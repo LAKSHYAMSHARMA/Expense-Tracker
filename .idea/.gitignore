@@ -1,7 +1,0 @@
-/shelf/
-/workspace.xml
-**/.env
-**/node_modules/
-**/target/
-# Only ignore properties if it has secrets
-expense-tracker/backend/src/main/resources/application.properties
