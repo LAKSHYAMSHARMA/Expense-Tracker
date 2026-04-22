@@ -30,9 +30,6 @@ public class TransactionCategory {
     @Column(name = "category_name", nullable = false, length = 100)
     private String categoryName;
 
-    @Column(name = "category_color", nullable = false, length = 7)
-    private String categoryColor;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

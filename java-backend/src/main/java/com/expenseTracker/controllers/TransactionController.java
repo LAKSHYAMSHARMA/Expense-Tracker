@@ -1,6 +1,7 @@
 package com.expenseTracker.controllers;
 
 import com.expenseTracker.dto.TransactionDTO;
+import com.expenseTracker.dto.SpendingBreakdownDTO;
 import com.expenseTracker.services.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -69,5 +71,27 @@ public class TransactionController {
         log.info("Deleting transaction id={}", transactionId);
         transactionService.deleteTransactionById(transactionId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search/user/{userId}")
+    public ResponseEntity<List<TransactionDTO>> searchTransactions(
+            @PathVariable int userId,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) String transactionType,
+            @RequestParam(required = false) BigDecimal minAmount,
+            @RequestParam(required = false) BigDecimal maxAmount
+    ) {
+        log.info("Searching transactions for userId={}, categoryId={}, type={}, minAmount={}, maxAmount={}",
+                userId, categoryId, transactionType, minAmount, maxAmount);
+
+        return ResponseEntity.ok(
+                transactionService.searchTransactions(userId, categoryId, transactionType, minAmount, maxAmount)
+        );
+    }
+
+    @GetMapping("/breakdown/user/{userId}")
+    public ResponseEntity<SpendingBreakdownDTO> getSpendingBreakdown(@PathVariable int userId) {
+        log.info("Fetching spending breakdown for userId={}", userId);
+        return ResponseEntity.ok(transactionService.getSpendingBreakdown(userId));
     }
 }

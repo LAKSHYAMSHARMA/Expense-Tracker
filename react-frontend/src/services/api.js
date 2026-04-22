@@ -33,6 +33,20 @@ export const TransactionApi = {
         const response = await API.get(`/transaction/years/${userId}`);
         return unwrapData(response);
     },
+    searchTransactions: async (userId, categoryId, transactionType, minAmount, maxAmount) => {
+        const params = {};
+        if (categoryId) params.categoryId = categoryId;
+        if (transactionType) params.transactionType = transactionType;
+        if (minAmount) params.minAmount = minAmount;
+        if (maxAmount) params.maxAmount = maxAmount;
+        
+        const response = await API.get(`/transaction/search/user/${userId}`, { params });
+        return unwrapData(response);
+    },
+    getSpendingBreakdown: async (userId) => {
+        const response = await API.get(`/transaction/breakdown/user/${userId}`);
+        return unwrapData(response);
+    },
     createTransaction: async (transaction) => {
         const response = await API.post('/transaction', transaction);
         return unwrapData(response);

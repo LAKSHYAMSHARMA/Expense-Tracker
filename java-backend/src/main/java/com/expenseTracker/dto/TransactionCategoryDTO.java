@@ -25,10 +25,6 @@ public class TransactionCategoryDTO {
     @Size(min = 2, max = 100, message = "Category name must be between 2 and 100 characters")
     private String categoryName;
 
-    @NotBlank(message = "Category color is required")
-    @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "Category color must be a valid hex color (e.g., #FF5733)")
-    private String categoryColor;
-
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

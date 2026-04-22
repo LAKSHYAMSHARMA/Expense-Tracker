@@ -48,7 +48,6 @@ public class TransactionCategoryService {
 
         TransactionCategory transactionCategory = new TransactionCategory();
         transactionCategory.setCategoryName(transactionCategoryDTO.getCategoryName());
-        transactionCategory.setCategoryColor(transactionCategoryDTO.getCategoryColor());
         transactionCategory.setUser(user);
 
         TransactionCategory savedCategory = transactionCategoryRepository.save(transactionCategory);
@@ -64,7 +63,6 @@ public class TransactionCategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction category not found with id: " + transactionCategoryId));
 
         existingCategory.setCategoryName(updatedDto.getCategoryName());
-        existingCategory.setCategoryColor(updatedDto.getCategoryColor());
 
         TransactionCategory savedCategory = transactionCategoryRepository.save(existingCategory);
         log.info("Transaction category updated successfully");
@@ -86,7 +84,6 @@ public class TransactionCategoryService {
         TransactionCategoryDTO dto = new TransactionCategoryDTO();
         dto.setId(category.getId());
         dto.setCategoryName(category.getCategoryName());
-        dto.setCategoryColor(category.getCategoryColor());
         dto.setCreatedAt(category.getCreatedAt());
         dto.setUpdatedAt(category.getUpdatedAt());
         if (category.getUser() != null) {

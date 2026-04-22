@@ -6,10 +6,17 @@ import { formatCurrency, formatDate } from '../utils/format';
 const EMPTY_FORM = {
   transactionName: '',
   transactionAmount: '',
-  transactionType: 'EXPENSE',
+  transactionType: 'EXPENSE-NEED',
   transactionDate: new Date().toISOString().slice(0, 10),
   categoryId: '',
 };
+
+const TRANSACTION_TYPES = [
+  { value: 'INCOME', label: 'Income' },
+  { value: 'EXPENSE-NEED', label: 'Expense - Need' },
+  { value: 'EXPENSE-WANT', label: 'Expense - Want' },
+  { value: 'EXPENSE-INVESTMENT', label: 'Expense - Investment' },
+];
 
 const TransactionsPage = ({ userId }) => {
   const [transactions, setTransactions] = useState([]);
@@ -22,6 +29,15 @@ const TransactionsPage = ({ userId }) => {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  
+  // Search filters
+  const [searchMode, setSearchMode] = useState(false);
+  const [searchFilters, setSearchFilters] = useState({
+    categoryId: '',
+    transactionType: '',
+    minAmount: '',
+    maxAmount: '',
+  });
 
   const loadTransactions = async () => {
     setLoading(true);
@@ -36,6 +52,26 @@ const TransactionsPage = ({ userId }) => {
       setTransactions(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(getErrorMessage(err, 'Unable to fetch transactions.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadSearchTransactions = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const data = await TransactionApi.searchTransactions(
+        userId,
+        searchFilters.categoryId ? Number(searchFilters.categoryId) : null,
+        searchFilters.transactionType || null,
+        searchFilters.minAmount ? Number(searchFilters.minAmount) : null,
+        searchFilters.maxAmount ? Number(searchFilters.maxAmount) : null,
+      );
+      setTransactions(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setError(getErrorMessage(err, 'Unable to search transactions.'));
     } finally {
       setLoading(false);
     }
@@ -72,9 +108,13 @@ const TransactionsPage = ({ userId }) => {
   }, [userId]);
 
   useEffect(() => {
-    loadTransactions();
+    if (searchMode) {
+      loadSearchTransactions();
+    } else {
+      loadTransactions();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, yearFilter, monthFilter]);
+  }, [userId, yearFilter, monthFilter, searchMode]);
 
   const monthlyTotal = useMemo(() => {
     return transactions.reduce((sum, tx) => sum + Number(tx.transactionAmount || 0), 0);
@@ -85,9 +125,24 @@ const TransactionsPage = ({ userId }) => {
     setEditingId(null);
   };
 
+  const resetSearch = () => {
+    setSearchFilters({
+      categoryId: '',
+      transactionType: '',
+      minAmount: '',
+      maxAmount: '',
+    });
+    setSearchMode(false);
+  };
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSearchFilterChange = (event) => {
+    const { name, value } = event.target;
+    setSearchFilters((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleEdit = (tx) => {
@@ -95,10 +150,20 @@ const TransactionsPage = ({ userId }) => {
     setForm({
       transactionName: tx.transactionName || '',
       transactionAmount: tx.transactionAmount ?? '',
-      transactionType: tx.transactionType || 'EXPENSE',
+      transactionType: tx.transactionType || 'EXPENSE-NEED',
       transactionDate: tx.transactionDate ? String(tx.transactionDate).slice(0, 10) : '',
       categoryId: tx.categoryId || tx.transactionCategoryId || '',
     });
+  };
+
+  const getTransactionTypeLabel = (type) => {
+    const typeObj = TRANSACTION_TYPES.find((t) => t.value === type);
+    return typeObj ? typeObj.label : type;
+  };
+
+  const handleApplySearch = async () => {
+    setSearchMode(true);
+    await loadSearchTransactions();
   };
 
   const handleSubmit = async (event) => {
@@ -126,7 +191,11 @@ const TransactionsPage = ({ userId }) => {
       }
 
       resetForm();
-      await loadTransactions();
+      if (searchMode) {
+        await loadSearchTransactions();
+      } else {
+        await loadTransactions();
+      }
     } catch (err) {
       setError(getErrorMessage(err, 'Unable to save transaction.'));
     } finally {
@@ -139,7 +208,11 @@ const TransactionsPage = ({ userId }) => {
 
     try {
       await TransactionApi.deleteTransaction(transactionId);
-      await loadTransactions();
+      if (searchMode) {
+        await loadSearchTransactions();
+      } else {
+        await loadTransactions();
+      }
     } catch (err) {
       setError(getErrorMessage(err, 'Unable to delete transaction.'));
     }
@@ -184,8 +257,11 @@ const TransactionsPage = ({ userId }) => {
           <label>
             <span>Type</span>
             <select name="transactionType" value={form.transactionType} onChange={handleInputChange}>
-              <option value="EXPENSE">Expense</option>
-              <option value="INCOME">Income</option>
+              {TRANSACTION_TYPES.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
             </select>
           </label>
 
@@ -222,31 +298,121 @@ const TransactionsPage = ({ userId }) => {
       <div className="panel">
         <div className="panel-header-row">
           <h2>Transaction List</h2>
-          <div className="inline-filters">
-            <label>
-              <span>Year</span>
-              <select value={yearFilter} onChange={(e) => setYearFilter(Number(e.target.value))}>
-                {years.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              <span>Month</span>
-              <select value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)}>
-                <option value="">All</option>
-                {Array.from({ length: 12 }, (_, index) => index + 1).map((month) => (
-                  <option key={month} value={month}>
-                    {month}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+          {searchMode && (
+            <div className="inline-filters">
+              <button type="button" className="btn-ghost" onClick={resetSearch}>
+                Clear Search
+              </button>
+            </div>
+          )}
         </div>
+
+        {!searchMode && (
+          <div className="panel-header-row">
+            <div className="inline-filters">
+              <label>
+                <span>Year</span>
+                <select value={yearFilter} onChange={(e) => setYearFilter(Number(e.target.value))}>
+                  {years.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                <span>Month</span>
+                <select value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)}>
+                  <option value="">All</option>
+                  {Array.from({ length: 12 }, (_, index) => index + 1).map((month) => (
+                    <option key={month} value={month}>
+                      {month}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <button type="button" className="btn-ghost" onClick={() => setSearchMode(true)}>
+                Advanced Search
+              </button>
+            </div>
+          </div>
+        )}
+
+        {searchMode && (
+          <div className="search-filters">
+            <h3>Search Filters</h3>
+            <div className="form-grid">
+              <label>
+                <span>Category</span>
+                <select
+                  name="categoryId"
+                  value={searchFilters.categoryId}
+                  onChange={handleSearchFilterChange}
+                >
+                  <option value="">All Categories</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.categoryName}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                <span>Transaction Type</span>
+                <select
+                  name="transactionType"
+                  value={searchFilters.transactionType}
+                  onChange={handleSearchFilterChange}
+                >
+                  <option value="">All Types</option>
+                  {TRANSACTION_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                <span>Min Amount</span>
+                <input
+                  name="minAmount"
+                  value={searchFilters.minAmount}
+                  onChange={handleSearchFilterChange}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                />
+              </label>
+
+              <label>
+                <span>Max Amount</span>
+                <input
+                  name="maxAmount"
+                  value={searchFilters.maxAmount}
+                  onChange={handleSearchFilterChange}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="999999.99"
+                />
+              </label>
+
+              <div className="actions-row">
+                <button type="button" onClick={handleApplySearch}>
+                  Search
+                </button>
+                <button type="button" className="btn-ghost" onClick={resetSearch}>
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {error && <p className="error-text">{error}</p>}
         {loading && <p className="status-text">Loading transactions...</p>}
@@ -275,7 +441,7 @@ const TransactionsPage = ({ userId }) => {
                       <td>{tx.categoryName || '-'}</td>
                       <td>
                         <span className={`badge ${tx.transactionType === 'INCOME' ? 'badge-income' : 'badge-expense'}`}>
-                          {tx.transactionType}
+                          {getTransactionTypeLabel(tx.transactionType)}
                         </span>
                       </td>
                       <td className="align-right">{formatCurrency(tx.transactionAmount)}</td>

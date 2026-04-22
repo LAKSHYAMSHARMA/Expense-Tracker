@@ -1,0 +1,121 @@
+.spending-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.breakdown-content {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.pie-chart-container {
+  flex: 0 0 200px;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pie-chart {
+  width: 100%;
+  height: 100%;
+  max-width: 200px;
+  max-height: 200px;
+}
+
+.breakdown-legend {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.legend-color {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+
+.legend-text {
+  flex: 1;
+}
+
+.legend-label {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+}
+
+.legend-percentage {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.legend-amount {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.breakdown-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1.5rem;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.stat-row span:first-child {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.stat-row span:last-child {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.stat-row.remaining span:last-child {
+  color: #51cf66;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .breakdown-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pie-chart-container {
+    flex: 0 0 150px;
+    width: 150px;
+    height: 150px;
+  }
+
+  .breakdown-legend {
+    min-width: 100%;
+  }
+}

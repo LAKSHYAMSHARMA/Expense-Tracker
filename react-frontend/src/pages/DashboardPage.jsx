@@ -2,28 +2,34 @@ import { useEffect, useMemo, useState } from 'react';
 import { TransactionApi } from '../services/api';
 import { getErrorMessage } from '../utils/http';
 import { formatCurrency, formatDate } from '../utils/format';
+import SpendingBreakdownChart from '../components/SpendingBreakdownChart';
 
 const DashboardPage = ({ userId }) => {
   const [transactions, setTransactions] = useState([]);
+  const [breakdown, setBreakdown] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const loadRecentTransactions = async () => {
+    const loadData = async () => {
       setLoading(true);
       setError('');
 
       try {
-        const data = await TransactionApi.getRecentTransactions(userId, 0, 0, 8);
-        setTransactions(Array.isArray(data) ? data : []);
+        const [transactionsData, breakdownData] = await Promise.all([
+          TransactionApi.getRecentTransactions(userId, 0, 0, 8),
+          TransactionApi.getSpendingBreakdown(userId),
+        ]);
+        setTransactions(Array.isArray(transactionsData) ? transactionsData : []);
+        setBreakdown(breakdownData);
       } catch (err) {
-        setError(getErrorMessage(err, 'Unable to load recent transactions.'));
+        setError(getErrorMessage(err, 'Unable to load dashboard data.'));
       } finally {
         setLoading(false);
       }
     };
 
-    loadRecentTransactions();
+    loadData();
   }, [userId]);
 
   const totals = useMemo(() => {
@@ -53,16 +59,27 @@ const DashboardPage = ({ userId }) => {
       <div className="stats-grid">
         <article className="stat-card income-card">
           <h3>Total Income</h3>
-          <p>{formatCurrency(totals.income)}</p>
+          <p>{formatCurrency(breakdown?.totalIncome || 0)}</p>
         </article>
         <article className="stat-card expense-card">
-          <h3>Total Expense</h3>
-          <p>{formatCurrency(totals.expense)}</p>
+          <h3>Total Spent</h3>
+          <p>{formatCurrency((breakdown?.needsAmount || 0) + (breakdown?.wantsAmount || 0) + (breakdown?.investmentAmount || 0))}</p>
         </article>
         <article className="stat-card balance-card">
-          <h3>Net Balance</h3>
-          <p>{formatCurrency(balance)}</p>
+          <h3>Remaining/Savings</h3>
+          <p>{formatCurrency(breakdown?.savingsAmount || 0)}</p>
         </article>
+      </div>
+
+      <div className="panel">
+        <h2>Spending Breakdown</h2>
+        {loading ? (
+          <p className="status-text">Loading breakdown...</p>
+        ) : breakdown ? (
+          <SpendingBreakdownChart data={breakdown} />
+        ) : (
+          <p className="status-text">No spending data available.</p>
+        )}
       </div>
 
       <div className="panel">

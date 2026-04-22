@@ -139,15 +139,15 @@
 }
 
 .income-card p {
-  color: var(--income);
+  color: #c4a31b;
 }
 
 .expense-card p {
-  color: var(--expense);
+  color: #b42020;
 }
 
 .balance-card p {
-  color: #2059b4;
+  color: #20b439;
 }
 
 .panel {

@@ -1,6 +1,7 @@
 package com.expenseTracker.services;
 
 import com.expenseTracker.dto.TransactionDTO;
+import com.expenseTracker.dto.SpendingBreakdownDTO;
 import com.expenseTracker.entities.Transaction;
 import com.expenseTracker.entities.TransactionCategory;
 import com.expenseTracker.entities.User;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -166,5 +168,80 @@ public class TransactionService {
             dto.setCategoryName(transaction.getTransactionCategory().getCategoryName());
         }
         return dto;
+    }
+
+    @Transactional(readOnly = true)
+    public List<TransactionDTO> searchTransactions(Integer userId, Integer categoryId, String transactionType, 
+                                                   BigDecimal minAmount, BigDecimal maxAmount) {
+        log.info("Searching transactions for user: {}, category: {}, type: {}, minAmount: {}, maxAmount: {}", 
+                 userId, categoryId, transactionType, minAmount, maxAmount);
+
+        validateUser(userId);
+
+        List<Transaction> results = transactionRepository.findTransactionsByCriteria(
+                userId, categoryId, transactionType, minAmount, maxAmount
+        );
+
+        return results.stream()
+            .map(this::toDto)
+            .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public SpendingBreakdownDTO getSpendingBreakdown(Integer userId) {
+        log.info("Calculating spending breakdown for user: {}", userId);
+
+        validateUser(userId);
+
+        List<Transaction> allTransactions = transactionRepository.findAllByUser_Id(userId);
+
+        BigDecimal needsAmount = BigDecimal.ZERO;
+        BigDecimal wantsAmount = BigDecimal.ZERO;
+        BigDecimal investmentAmount = BigDecimal.ZERO;
+        BigDecimal totalIncome = BigDecimal.ZERO;
+
+        for (Transaction tx : allTransactions) {
+            if ("INCOME".equals(tx.getTransactionType())) {
+                totalIncome = totalIncome.add(tx.getTransactionAmount());
+            } else if ("EXPENSE-NEED".equals(tx.getTransactionType())) {
+                needsAmount = needsAmount.add(tx.getTransactionAmount());
+            } else if ("EXPENSE-WANT".equals(tx.getTransactionType())) {
+                wantsAmount = wantsAmount.add(tx.getTransactionAmount());
+            } else if ("EXPENSE-INVESTMENT".equals(tx.getTransactionType())) {
+                investmentAmount = investmentAmount.add(tx.getTransactionAmount());
+            }
+        }
+
+        BigDecimal totalSpent = needsAmount.add(wantsAmount).add(investmentAmount);
+        BigDecimal savingsAmount = totalIncome.subtract(totalSpent);
+        if (savingsAmount.compareTo(BigDecimal.ZERO) < 0) {
+            savingsAmount = BigDecimal.ZERO;
+        }
+
+        // Calculate percentages based on total income
+        Double needsPercentage = 0.0;
+        Double wantsPercentage = 0.0;
+        Double investmentPercentage = 0.0;
+        Double savingsPercentage = 0.0;
+
+        if (totalIncome.compareTo(BigDecimal.ZERO) > 0) {
+            needsPercentage = (needsAmount.doubleValue() / totalIncome.doubleValue()) * 100;
+            wantsPercentage = (wantsAmount.doubleValue() / totalIncome.doubleValue()) * 100;
+            investmentPercentage = (investmentAmount.doubleValue() / totalIncome.doubleValue()) * 100;
+            savingsPercentage = (savingsAmount.doubleValue() / totalIncome.doubleValue()) * 100;
+        }
+
+        return SpendingBreakdownDTO.builder()
+                .needsAmount(needsAmount)
+                .wantsAmount(wantsAmount)
+                .investmentAmount(investmentAmount)
+                .totalSpent(totalSpent)
+                .totalIncome(totalIncome)
+                .savingsAmount(savingsAmount)
+                .needsPercentage(needsPercentage)
+                .wantsPercentage(wantsPercentage)
+                .investmentPercentage(investmentPercentage)
+                .savingsPercentage(savingsPercentage)
+                .build();
     }
 }

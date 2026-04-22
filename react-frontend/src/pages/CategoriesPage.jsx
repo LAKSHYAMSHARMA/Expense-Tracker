@@ -4,7 +4,6 @@ import { getErrorMessage } from '../utils/http';
 
 const EMPTY_FORM = {
   categoryName: '',
-  categoryColor: '#0ea5e9',
 };
 
 const CategoriesPage = ({ userId }) => {
@@ -43,7 +42,6 @@ const CategoriesPage = ({ userId }) => {
     setEditingId(category.id);
     setForm({
       categoryName: category.categoryName || '',
-      categoryColor: category.categoryColor || '#0ea5e9',
     });
   };
 
@@ -61,7 +59,6 @@ const CategoriesPage = ({ userId }) => {
       const payload = {
         userId,
         categoryName: form.categoryName.trim(),
-        categoryColor: form.categoryColor,
       };
 
       if (editingId) {
@@ -111,11 +108,6 @@ const CategoriesPage = ({ userId }) => {
             />
           </label>
 
-          <label>
-            <span>Color</span>
-            <input name="categoryColor" type="color" value={form.categoryColor} onChange={handleInputChange} />
-          </label>
-
           <div className="actions-row">
             <button type="submit" disabled={submitting}>
               {submitting ? 'Saving...' : editingId ? 'Update' : 'Create'}
@@ -143,7 +135,6 @@ const CategoriesPage = ({ userId }) => {
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Color</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -151,11 +142,6 @@ const CategoriesPage = ({ userId }) => {
                 {categories.map((category) => (
                   <tr key={category.id}>
                     <td>{category.categoryName}</td>
-                    <td>
-                      <span className="color-pill" style={{ backgroundColor: category.categoryColor || '#0ea5e9' }}>
-                        {category.categoryColor || '#0ea5e9'}
-                      </span>
-                    </td>
                     <td className="cell-actions">
                       <button type="button" className="btn-ghost" onClick={() => handleEdit(category)}>
                         Edit

@@ -38,6 +38,6 @@ public class TransactionDTO {
     private LocalDate transactionDate;
 
     @NotBlank(message = "Transaction type is required")
-    @Pattern(regexp = "INCOME|EXPENSE", message = "Transaction type must be either INCOME or EXPENSE")
+    @Pattern(regexp = "INCOME|EXPENSE-NEED|EXPENSE-WANT|EXPENSE-INVESTMENT", message = "Transaction type must be INCOME, EXPENSE-NEED, EXPENSE-WANT, or EXPENSE-INVESTMENT")
     private String transactionType;
 }
