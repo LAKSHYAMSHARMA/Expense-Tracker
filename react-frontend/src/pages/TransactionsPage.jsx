@@ -18,7 +18,7 @@ const TRANSACTION_TYPES = [
   { value: 'EXPENSE-INVESTMENT', label: 'Expense - Investment' },
 ];
 
-const TransactionsPage = ({ userId }) => {
+const TransactionsPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [years, setYears] = useState([new Date().getFullYear()]);
@@ -45,7 +45,6 @@ const TransactionsPage = ({ userId }) => {
 
     try {
       const data = await TransactionApi.getTransactionsByUser(
-        userId,
         Number(yearFilter),
         monthFilter ? Number(monthFilter) : undefined,
       );
@@ -63,7 +62,6 @@ const TransactionsPage = ({ userId }) => {
 
     try {
       const data = await TransactionApi.searchTransactions(
-        userId,
         searchFilters.categoryId ? Number(searchFilters.categoryId) : null,
         searchFilters.transactionType || null,
         searchFilters.minAmount ? Number(searchFilters.minAmount) : null,
@@ -79,7 +77,7 @@ const TransactionsPage = ({ userId }) => {
 
   const loadYears = async () => {
     try {
-      const data = await TransactionApi.getDistinctTransactionYears(userId);
+      const data = await TransactionApi.getDistinctTransactionYears();
       if (Array.isArray(data) && data.length > 0) {
         const sortedYears = [...data].sort((a, b) => b - a);
         setYears(sortedYears);
@@ -94,7 +92,7 @@ const TransactionsPage = ({ userId }) => {
 
   const loadCategories = async () => {
     try {
-      const data = await CategoryApi.getCategoriesByUser(userId);
+      const data = await CategoryApi.getCategoriesByUser();
       setCategories(Array.isArray(data) ? data : []);
     } catch {
       setCategories([]);
@@ -105,7 +103,7 @@ const TransactionsPage = ({ userId }) => {
     loadYears();
     loadCategories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
+  }, []);
 
   useEffect(() => {
     if (searchMode) {
@@ -114,7 +112,7 @@ const TransactionsPage = ({ userId }) => {
       loadTransactions();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, yearFilter, monthFilter, searchMode]);
+  }, [yearFilter, monthFilter, searchMode]);
 
   const monthlyTotal = useMemo(() => {
     return transactions.reduce((sum, tx) => sum + Number(tx.transactionAmount || 0), 0);
@@ -174,7 +172,6 @@ const TransactionsPage = ({ userId }) => {
     try {
       const payload = {
         ...(editingId ? { id: editingId } : {}),
-        userId,
         transactionName: form.transactionName.trim(),
         transactionAmount: Number(form.transactionAmount),
         transactionType: form.transactionType,
@@ -222,7 +219,7 @@ const TransactionsPage = ({ userId }) => {
     <section className="page-section">
       <div className="section-header">
         <h1>Transactions</h1>
-        <p>Manage income and expense entries for user #{userId}</p>
+        <p>Manage your income and expense entries</p>
       </div>
 
       <div className="panel">

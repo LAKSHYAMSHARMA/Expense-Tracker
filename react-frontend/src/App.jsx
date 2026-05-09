@@ -4,30 +4,12 @@ import DashboardPage from './pages/DashboardPage';
 import TransactionsPage from './pages/TransactionsPage';
 import CategoriesPage from './pages/CategoriesPage';
 import LoginPage from './pages/LoginPage';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { AuthApi } from './services/api';
 import './App.css';
 
-const AUTH_STORAGE_KEY = 'expense-tracker.auth-user';
-
-const parseStoredAuthUser = () => {
-  const rawValue = localStorage.getItem(AUTH_STORAGE_KEY);
-  if (!rawValue) {
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(rawValue);
-    if (!parsed?.id || !parsed?.email) {
-      return null;
-    }
-    return parsed;
-  } catch {
-    return null;
-  }
-};
-
-function App() {
-  const [authUser, setAuthUser] = useState(() => parseStoredAuthUser());
+function AppContent() {
+  const { authToken, authUser, login, logout, isAuthenticated } = useAuth();
   const [loginError, setLoginError] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
 
@@ -36,15 +18,15 @@ function App() {
     setLoginError('');
 
     try {
-      const user = await AuthApi.googleSignIn(idToken);
-      const nextUser = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
+      const response = await AuthApi.googleSignIn(idToken);
+      
+      // Store user info via auth context
+      const userData = {
+        id: response.userId,
+        name: response.name,
+        email: response.email,
       };
-
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(nextUser));
-      setAuthUser(nextUser);
+      login(response.token, userData);
     } catch (error) {
       const message = error?.response?.data?.message || 'Google sign-in failed. Please try again.';
       setLoginError(message);
@@ -53,12 +35,7 @@ function App() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-    setAuthUser(null);
-  };
-
-  if (!authUser) {
+  if (!isAuthenticated || !authToken || !authUser) {
     return <LoginPage onGoogleSignIn={handleGoogleSignIn} loading={loginLoading} error={loginError} />;
   }
 
@@ -74,7 +51,7 @@ function App() {
           <p>Signed in as</p>
           <strong>{authUser.name || authUser.email}</strong>
           <small>{authUser.email}</small>
-          <button type="button" className="btn-ghost" onClick={handleLogout}>
+          <button type="button" className="btn-ghost" onClick={logout}>
             Sign out
           </button>
         </div>
@@ -96,14 +73,22 @@ function App() {
         <main className="main-content">
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<DashboardPage userId={authUser.id} />} />
-            <Route path="/transactions" element={<TransactionsPage userId={authUser.id} />} />
-            <Route path="/categories" element={<CategoriesPage userId={authUser.id} />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/transactions" element={<TransactionsPage />} />
+            <Route path="/categories" element={<CategoriesPage />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

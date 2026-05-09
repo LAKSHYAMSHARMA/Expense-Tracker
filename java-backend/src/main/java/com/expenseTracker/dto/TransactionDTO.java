@@ -21,7 +21,6 @@ public class TransactionDTO {
 
     private String categoryName;
 
-    @NotNull(message = "User ID is required")
     private Integer userId;
 
     @NotBlank(message = "Transaction name is required")

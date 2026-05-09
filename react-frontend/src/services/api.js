@@ -1,11 +1,23 @@
 import axios from 'axios';
 
 const API = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1',
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },
 });
+
+// Interceptor to add JWT token to requests
+API.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('expense-tracker.auth-token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
 
 const unwrapData = (response) => {
     const payload = response?.data;
@@ -19,32 +31,32 @@ const unwrapData = (response) => {
 };
 
 export const TransactionApi = {
-    getTransactionsByUser: async (userId, year, month) => {
-        const response = await API.get(`/transaction/user/${userId}`, { params: { year, month } });
+    getTransactionsByUser: async (year, month) => {
+        const response = await API.get('/transaction', { params: { year, month } });
         return unwrapData(response);
     },
-    getRecentTransactions: async (userId, startPage = 0, endPage = 0, size = 5) => {
-        const response = await API.get(`/transaction/recent/user/${userId}`, {
+    getRecentTransactions: async (startPage = 0, endPage = 0, size = 5) => {
+        const response = await API.get('/transaction/recent', {
             params: { startPage, endPage, size },
         });
         return unwrapData(response);
     },
-    getDistinctTransactionYears: async (userId) => {
-        const response = await API.get(`/transaction/years/${userId}`);
+    getDistinctTransactionYears: async () => {
+        const response = await API.get('/transaction/years');
         return unwrapData(response);
     },
-    searchTransactions: async (userId, categoryId, transactionType, minAmount, maxAmount) => {
+    searchTransactions: async (categoryId, transactionType, minAmount, maxAmount) => {
         const params = {};
         if (categoryId) params.categoryId = categoryId;
         if (transactionType) params.transactionType = transactionType;
         if (minAmount) params.minAmount = minAmount;
         if (maxAmount) params.maxAmount = maxAmount;
         
-        const response = await API.get(`/transaction/search/user/${userId}`, { params });
+        const response = await API.get('/transaction/search', { params });
         return unwrapData(response);
     },
-    getSpendingBreakdown: async (userId) => {
-        const response = await API.get(`/transaction/breakdown/user/${userId}`);
+    getSpendingBreakdown: async () => {
+        const response = await API.get('/transaction/breakdown');
         return unwrapData(response);
     },
     createTransaction: async (transaction) => {
@@ -61,8 +73,8 @@ export const TransactionApi = {
 };
 
 export const CategoryApi = {
-    getCategoriesByUser: async (userId) => {
-        const response = await API.get(`/transaction-categories/user/${userId}`);
+    getCategoriesByUser: async () => {
+        const response = await API.get('/transaction-categories');
         return unwrapData(response);
     },
     getCategoryById: async (id) => {

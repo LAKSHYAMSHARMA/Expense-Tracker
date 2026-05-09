@@ -37,12 +37,20 @@ public class TransactionService {
 
         validateUser(userId);
 
-        List<Transaction> combinedResults = transactionRepository
-            .findAllByUser_IdOrderByTransactionDateDesc(userId, PageRequest.of(0, (endPage - startPage + 1) * pageSize))
-                .stream()
-                .skip((long) startPage * pageSize)
-                .limit((long) (endPage - startPage + 1) * pageSize)
-                .toList();
+        // Validate pagination parameters
+        if (startPage < 0 || endPage < startPage || pageSize <= 0) {
+            throw new BusinessException("Invalid pagination parameters: startPage=" + startPage + ", endPage=" + endPage + ", pageSize=" + pageSize);
+        }
+
+        // Use database-level pagination for efficiency
+        int totalPagesToFetch = endPage - startPage + 1;
+        List<Transaction> combinedResults = new java.util.ArrayList<>();
+        
+        for (int page = startPage; page <= endPage; page++) {
+            List<Transaction> pageResult = transactionRepository
+                .findAllByUser_IdOrderByTransactionDateDesc(userId, PageRequest.of(page, pageSize));
+            combinedResults.addAll(pageResult);
+        }
 
         return combinedResults.stream()
             .map(this::toDto)

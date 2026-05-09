@@ -4,7 +4,7 @@ import { getErrorMessage } from '../utils/http';
 import { formatCurrency, formatDate } from '../utils/format';
 import SpendingBreakdownChart from '../components/SpendingBreakdownChart';
 
-const DashboardPage = ({ userId }) => {
+const DashboardPage = () => {
   const [transactions, setTransactions] = useState([]);
   const [breakdown, setBreakdown] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -17,8 +17,8 @@ const DashboardPage = ({ userId }) => {
 
       try {
         const [transactionsData, breakdownData] = await Promise.all([
-          TransactionApi.getRecentTransactions(userId, 0, 0, 8),
-          TransactionApi.getSpendingBreakdown(userId),
+          TransactionApi.getRecentTransactions(0, 0, 8),
+          TransactionApi.getSpendingBreakdown(),
         ]);
         setTransactions(Array.isArray(transactionsData) ? transactionsData : []);
         setBreakdown(breakdownData);
@@ -30,7 +30,7 @@ const DashboardPage = ({ userId }) => {
     };
 
     loadData();
-  }, [userId]);
+  }, []);
 
   const totals = useMemo(() => {
     return transactions.reduce(
@@ -53,7 +53,7 @@ const DashboardPage = ({ userId }) => {
     <section className="page-section">
       <div className="section-header">
         <h1>Dashboard</h1>
-        <p>Recent activity for user #{userId}</p>
+        <p>Your financial overview</p>
       </div>
 
       <div className="stats-grid">

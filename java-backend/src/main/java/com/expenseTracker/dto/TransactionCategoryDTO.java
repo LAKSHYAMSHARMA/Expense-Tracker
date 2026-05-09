@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 public class TransactionCategoryDTO {
     private Integer id;
 
-    @NotNull(message = "User ID is required")
     private Integer userId;
 
     @NotBlank(message = "Category name is required")

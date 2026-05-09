@@ -6,7 +6,7 @@ const EMPTY_FORM = {
   categoryName: '',
 };
 
-const CategoriesPage = ({ userId }) => {
+const CategoriesPage = () => {
   const [categories, setCategories] = useState([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
@@ -19,7 +19,7 @@ const CategoriesPage = ({ userId }) => {
     setError('');
 
     try {
-      const data = await CategoryApi.getCategoriesByUser(userId);
+      const data = await CategoryApi.getCategoriesByUser();
       setCategories(Array.isArray(data) ? data : []);
     } catch (err) {
       setError(getErrorMessage(err, 'Unable to load categories.'));
@@ -31,7 +31,7 @@ const CategoriesPage = ({ userId }) => {
   useEffect(() => {
     loadCategories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
+  }, []);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -57,7 +57,6 @@ const CategoriesPage = ({ userId }) => {
 
     try {
       const payload = {
-        userId,
         categoryName: form.categoryName.trim(),
       };
 
@@ -91,7 +90,7 @@ const CategoriesPage = ({ userId }) => {
     <section className="page-section">
       <div className="section-header">
         <h1>Categories</h1>
-        <p>Create and manage transaction categories for user #{userId}</p>
+        <p>Create and manage transaction categories</p>
       </div>
 
       <div className="panel">

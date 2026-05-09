@@ -1,3 +1,12 @@
+# Ignore generated docs containing implementation notes
+/docs/
+
+# Node modules and build artifacts
+node_modules/
+dist/
+
+# Java build artifacts
+**/target/
 .idea/
 .vscode/
 *.iml

@@ -4,11 +4,13 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
+import com.expenseTracker.dto.AuthResponseDTO;
 import com.expenseTracker.dto.UserDTO;
 import com.expenseTracker.entities.User;
 import com.expenseTracker.exception.BusinessException;
 import com.expenseTracker.exception.ResourceNotFoundException;
 import com.expenseTracker.repositories.UserRepository;
+import com.expenseTracker.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -28,6 +30,7 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final JwtUtil jwtUtil;
 
     @Value("${google.oauth.client-id:}")
     private String googleClientId;
@@ -72,7 +75,7 @@ public class UserService {
         return modelMapper.map(savedUser, UserDTO.class);
     }
 
-    public UserDTO signInWithGoogle(String idToken) {
+    public AuthResponseDTO signInWithGoogle(String idToken) {
         log.info("Signing in user with Google token");
 
         if (idToken == null || idToken.isBlank()) {
@@ -105,7 +108,15 @@ public class UserService {
             user = userRepository.save(user);
         }
 
-        return modelMapper.map(user, UserDTO.class);
+        // Generate JWT token
+        String token = jwtUtil.generateToken(user.getId(), user.getEmail());
+
+        return AuthResponseDTO.builder()
+                .token(token)
+                .userId(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .build();
     }
 
     private GoogleIdToken.Payload verifyGoogleIdToken(String idToken) {
