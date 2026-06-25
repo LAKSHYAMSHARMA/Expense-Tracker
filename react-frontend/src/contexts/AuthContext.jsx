@@ -1,6 +1,5 @@
-import { createContext, useContext, useState, useCallback } from 'react';
-
-const AuthContext = createContext(null);
+import { useCallback, useState } from 'react';
+import AuthContext from './authContext.js';
 
 export const AuthProvider = ({ children }) => {
   const [authToken, setAuthToken] = useState(() => localStorage.getItem('expense-tracker.auth-token'));
@@ -41,12 +40,4 @@ export const AuthProvider = ({ children }) => {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };

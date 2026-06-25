@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TransactionApi } from '../services/api';
 import { getErrorMessage } from '../utils/http';
 import { formatCurrency, formatDate } from '../utils/format';
@@ -31,23 +31,6 @@ const DashboardPage = () => {
 
     loadData();
   }, []);
-
-  const totals = useMemo(() => {
-    return transactions.reduce(
-      (acc, tx) => {
-        const amount = Number(tx.transactionAmount || 0);
-        if (tx.transactionType === 'INCOME') {
-          acc.income += amount;
-        } else {
-          acc.expense += amount;
-        }
-        return acc;
-      },
-      { income: 0, expense: 0 },
-    );
-  }, [transactions]);
-
-  const balance = totals.income - totals.expense;
 
   return (
     <section className="page-section">

@@ -4,7 +4,8 @@ import DashboardPage from './pages/DashboardPage';
 import TransactionsPage from './pages/TransactionsPage';
 import CategoriesPage from './pages/CategoriesPage';
 import LoginPage from './pages/LoginPage';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext.jsx';
+import useAuth from './contexts/useAuth';
 import { AuthApi } from './services/api';
 import './App.css';
 
