@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-backend:
     runs-on: ubuntu-latest
@@ -108,5 +115,8 @@ jobs:
         context: ./react-frontend
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/expense-tracker-frontend:latest
+        build-args: |
+          VITE_API_BASE_URL=${{ secrets.PRODUCTION_API_BASE_URL }}
+          VITE_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
         cache-from: type=gha
         cache-to: type=gha,mode=max

@@ -27,6 +27,7 @@ java-backend/src/main/resources/application.properties
 **/build/
 .eslintcache
 **/.env
+**/.env.production
 **/.env.local
 **/.env.development.local
 
