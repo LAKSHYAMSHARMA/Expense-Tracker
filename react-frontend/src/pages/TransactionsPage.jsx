@@ -29,8 +29,6 @@ const TransactionsPage = () => {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  
-  // Search filters
   const [searchMode, setSearchMode] = useState(false);
   const [searchFilters, setSearchFilters] = useState({
     categoryId: '',

@@ -21,7 +21,6 @@ function AppContent() {
     try {
       const response = await AuthApi.googleSignIn(idToken);
       
-      // Store user info via auth context
       const userData = {
         id: response.userId,
         name: response.name,

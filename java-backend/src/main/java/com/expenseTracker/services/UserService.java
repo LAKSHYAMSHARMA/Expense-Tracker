@@ -108,7 +108,6 @@ public class UserService {
             user = userRepository.save(user);
         }
 
-        // Generate JWT token
         String token = jwtUtil.generateToken(user.getId(), user.getEmail());
 
         return AuthResponseDTO.builder()

@@ -37,13 +37,10 @@ public class TransactionService {
 
         validateUser(userId);
 
-        // Validate pagination parameters
         if (startPage < 0 || endPage < startPage || pageSize <= 0) {
             throw new BusinessException("Invalid pagination parameters: startPage=" + startPage + ", endPage=" + endPage + ", pageSize=" + pageSize);
         }
 
-        // Use database-level pagination for efficiency
-        int totalPagesToFetch = endPage - startPage + 1;
         List<Transaction> combinedResults = new java.util.ArrayList<>();
         
         for (int page = startPage; page <= endPage; page++) {
@@ -226,7 +223,6 @@ public class TransactionService {
             savingsAmount = BigDecimal.ZERO;
         }
 
-        // Calculate percentages based on total income
         Double needsPercentage = 0.0;
         Double wantsPercentage = 0.0;
         Double investmentPercentage = 0.0;

@@ -23,7 +23,6 @@ const SpendingBreakdownChart = ({ data }) => {
     { label: 'Savings', percentage: investmentPercentage + savingsPercentage, amount: investmentAmount + savingsAmount, color: '#51CF66', code: 'savings' },
   ];
 
-  // Calculate pie chart path
   let currentAngle = -90; // Start from top
   const centerX = 50;
   const centerY = 50;

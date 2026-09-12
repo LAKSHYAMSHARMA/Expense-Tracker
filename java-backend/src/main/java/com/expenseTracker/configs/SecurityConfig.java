@@ -49,8 +49,6 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        // Return empty UserDetailsService to prevent Spring from auto-generating a default user
-        // Since we're using JWT with Google OAuth, no traditional username/password auth is needed
         return new InMemoryUserDetailsManager(Collections.emptyList());
     }
 
@@ -61,17 +59,12 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                // Public endpoints
                 .requestMatchers("/api/v1/auth/google").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
-                // Public API documentation
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/actuator/health/**").permitAll()
-                // Health check endpoints
                 .requestMatchers("/health", "/health/**").permitAll()
-                // All other API endpoints require authentication
                 .requestMatchers("/api/v1/**").authenticated()
-                // Anything else is allowed (static resources, etc.)
                 .anyRequest().permitAll()
             )
             .exceptionHandling(exceptions -> exceptions

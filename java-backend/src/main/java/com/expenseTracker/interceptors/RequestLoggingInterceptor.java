@@ -8,9 +8,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.util.UUID;
 
-/**
- * HTTP Interceptor for request/response logging and correlation tracking
- */
 @Component
 @Slf4j
 public class RequestLoggingInterceptor implements HandlerInterceptor {
@@ -24,16 +21,13 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
         long startTime = System.currentTimeMillis();
         request.setAttribute(REQUEST_START_TIME, startTime);
 
-        // Generate or extract correlation ID
         String correlationId = request.getHeader(CORRELATION_ID_HEADER);
         if (correlationId == null || correlationId.isEmpty()) {
             correlationId = UUID.randomUUID().toString();
         }
         
-        // Add correlation ID to response header
         response.setHeader(CORRELATION_ID_HEADER, correlationId);
         
-        // Log request details
         log.info("Incoming Request | Method: {} | URI: {} | CorrelationId: {} | IP: {}",
                 request.getMethod(),
                 request.getRequestURI(),
@@ -49,7 +43,6 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
         long duration = System.currentTimeMillis() - startTime;
         String correlationId = response.getHeader(CORRELATION_ID_HEADER);
 
-        // Log response details
         log.info("Outgoing Response | Method: {} | URI: {} | Status: {} | Duration: {}ms | CorrelationId: {}",
                 request.getMethod(),
                 request.getRequestURI(),
@@ -57,7 +50,6 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
                 duration,
                 correlationId);
 
-        // Log exceptions if present
         if (ex != null) {
             log.error("Request failed with exception | CorrelationId: {} | Error: {}",
                     correlationId,
@@ -66,9 +58,6 @@ public class RequestLoggingInterceptor implements HandlerInterceptor {
         }
     }
 
-    /**
-     * Extract client IP from request headers
-     */
     private String getClientIp(HttpServletRequest request) {
         String xForwardedFor = request.getHeader("X-Forwarded-For");
         if (xForwardedFor != null && !xForwardedFor.isEmpty()) {

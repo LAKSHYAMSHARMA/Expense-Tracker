@@ -7,7 +7,6 @@ const API = axios.create({
     },
 });
 
-// Interceptor to add JWT token to requests
 API.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('expense-tracker.auth-token');
@@ -22,7 +21,6 @@ API.interceptors.request.use(
 const unwrapData = (response) => {
     const payload = response?.data;
 
-    // User and category endpoints use ApiResponse<T>, while transaction endpoints return T directly.
     if (payload && typeof payload === 'object' && Object.hasOwn(payload, 'data')) {
         return payload.data;
     }

@@ -4,24 +4,17 @@ const LoginPage = ({ onGoogleSignIn, loading, error }) => {
   const [scriptError, setScriptError] = useState('');
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
   const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
-
-  console.log('LoginPage mounted. Client ID:', clientId ? clientId.substring(0, 20) + '...' : 'NOT SET');
-  console.log('Current origin:', currentOrigin);
-
-  // Check for OAuth callback in URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.hash.substring(1));
     const idToken = params.get('id_token');
     
     if (idToken) {
-      console.log('Found ID token in callback, signing in...');
       onGoogleSignIn(idToken);
     }
   }, [onGoogleSignIn]);
 
   const handleContinueWithGoogle = () => {
     setScriptError('');
-    console.log('Button clicked - initiating Google OAuth flow');
 
     if (!clientId || clientId.trim() === '') {
       setScriptError('Google client ID is not configured.');
@@ -29,7 +22,6 @@ const LoginPage = ({ onGoogleSignIn, loading, error }) => {
     }
 
     try {
-      // Direct OAuth2 implicit flow redirect
       const redirectUri = `${currentOrigin}/`;
       const scope = 'openid profile email';
       const responseType = 'id_token';
@@ -42,7 +34,6 @@ const LoginPage = ({ onGoogleSignIn, loading, error }) => {
       authUrl.searchParams.set('scope', scope);
       authUrl.searchParams.set('nonce', nonce);
 
-      console.log('Redirecting to Google OAuth:', authUrl.toString());
       window.location.href = authUrl.toString();
     } catch (e) {
       console.error('Error initiating OAuth flow:', e);

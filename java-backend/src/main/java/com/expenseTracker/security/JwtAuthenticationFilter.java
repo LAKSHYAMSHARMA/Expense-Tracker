@@ -32,7 +32,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (userId != null) {
                 log.debug("Setting authentication for userId: {}", userId);
-                // Create authentication token with userId as principal
                 UsernamePasswordAuthenticationToken auth = 
                     new UsernamePasswordAuthenticationToken(userId, null, null);
                 auth.setDetails(email);
