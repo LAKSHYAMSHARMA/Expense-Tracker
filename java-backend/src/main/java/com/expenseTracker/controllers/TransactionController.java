@@ -102,7 +102,7 @@ public class TransactionController {
         transactionDTO.setUserId(userId);
         log.info("Updating transaction id={}", transactionDTO.getId());
         return ResponseEntity.ok(
-                ApiResponse.success(transactionService.updateTransaction(transactionDTO),
+                ApiResponse.success(transactionService.updateTransaction(userId, transactionDTO),
                         "Transaction updated successfully", HttpStatus.OK.value())
         );
     }
@@ -113,7 +113,7 @@ public class TransactionController {
     public ResponseEntity<ApiResponse<Void>> deleteTransactionById(@PathVariable int transactionId) {
         Integer userId = getAuthenticatedUserId();
         log.info("Deleting transaction id={} for userId={}", transactionId, userId);
-        transactionService.deleteTransactionById(transactionId);
+        transactionService.deleteTransactionById(userId, transactionId);
         return ResponseEntity.ok(
                 ApiResponse.success(null, "Transaction deleted successfully", HttpStatus.OK.value())
         );

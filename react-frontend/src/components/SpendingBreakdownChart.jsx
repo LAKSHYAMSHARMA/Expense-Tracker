@@ -20,7 +20,8 @@ const SpendingBreakdownChart = ({ data }) => {
   const segments = [
     { label: 'Needs', percentage: needsPercentage, amount: needsAmount, color: '#FFD700', code: 'needs' },
     { label: 'Wants', percentage: wantsPercentage, amount: wantsAmount, color: '#FF6B6B', code: 'wants' },
-    { label: 'Savings', percentage: investmentPercentage + savingsPercentage, amount: investmentAmount + savingsAmount, color: '#51CF66', code: 'savings' },
+    { label: 'Investments', percentage: investmentPercentage, amount: investmentAmount, color: '#4C8DFF', code: 'investments' },
+    { label: 'Savings', percentage: savingsPercentage, amount: savingsAmount, color: '#51CF66', code: 'savings' },
   ];
 
   let currentAngle = -90; // Start from top

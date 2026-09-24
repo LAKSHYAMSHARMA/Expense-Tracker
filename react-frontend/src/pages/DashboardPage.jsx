@@ -35,8 +35,9 @@ const DashboardPage = () => {
   return (
     <section className="page-section">
       <div className="section-header">
-        <h1>Dashboard</h1>
-        <p>Your financial overview</p>
+        <p className="eyebrow page-eyebrow">Overview</p>
+        <h1>Your financial picture</h1>
+        <p>A clear view of everything you have recorded so far.</p>
       </div>
 
       <div className="stats-grid">
@@ -55,7 +56,12 @@ const DashboardPage = () => {
       </div>
 
       <div className="panel">
-        <h2>Spending Breakdown</h2>
+        <div className="panel-header-row">
+          <div>
+            <h2>Spending breakdown</h2>
+            <p className="panel-subtitle">Across all recorded transactions</p>
+          </div>
+        </div>
         {loading ? (
           <p className="status-text">Loading breakdown...</p>
         ) : breakdown ? (

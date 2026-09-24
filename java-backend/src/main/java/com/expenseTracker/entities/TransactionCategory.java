@@ -24,11 +24,14 @@ public class TransactionCategory {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Column(name = "category_name", nullable = false, length = 100)
     private String categoryName;
+
+    @Column(name = "predefined", nullable = false)
+    private boolean predefined;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

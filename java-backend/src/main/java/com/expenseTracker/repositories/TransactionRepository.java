@@ -11,6 +11,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
+        long countByTransactionCategory_Id(Integer categoryId);
+
     List<Transaction> findAllByUser_Id(int userId);
 
     List<Transaction> findAllByUser_IdOrderByTransactionDateDesc(int userId, Pageable pageable);

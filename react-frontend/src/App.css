@@ -96,7 +96,9 @@
 }
 
 .main-content {
-  padding: clamp(1rem, 2.2vw, 2rem);
+  width: min(1220px, 100%);
+  padding: clamp(1rem, 2.2vw, 2.4rem);
+  margin: 0 auto;
 }
 
 .page-section {
@@ -111,6 +113,12 @@
 
 .section-header p {
   color: var(--text-muted);
+}
+
+.page-eyebrow {
+  color: var(--brand) !important;
+  opacity: 1;
+  margin-bottom: 0.4rem;
 }
 
 .stats-grid {
@@ -163,6 +171,13 @@
   font-size: 1.1rem;
 }
 
+.panel-subtitle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: -0.65rem;
+  margin-bottom: 1rem;
+}
+
 .panel-header-row {
   display: flex;
   justify-content: space-between;
@@ -206,6 +221,14 @@ select {
   border-radius: 10px;
   padding: 0.58rem 0.68rem;
   background: #fff;
+}
+
+input:focus,
+select:focus,
+button:focus-visible,
+.nav-link:focus-visible {
+  outline: 3px solid rgba(31, 122, 79, 0.24);
+  outline-offset: 2px;
 }
 
 button {
@@ -294,6 +317,10 @@ button:disabled {
   background: #ffe1df;
 }
 
+.category-lock {
+  margin-left: 0.55rem;
+}
+
 .status-text {
   color: var(--text-muted);
 }
@@ -351,22 +378,110 @@ button:disabled {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 1rem;
+  padding: clamp(1rem, 4vw, 3rem);
   background:
     radial-gradient(circle at 20% 20%, rgba(31, 122, 79, 0.18), transparent 40%),
     radial-gradient(circle at 90% 10%, rgba(18, 77, 125, 0.22), transparent 35%),
     linear-gradient(150deg, #eaf4eb 0%, #f9fcff 45%, #e8f0f9 100%);
 }
 
+.login-layout {
+  width: min(1040px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.75fr);
+  align-items: center;
+  gap: clamp(2rem, 7vw, 7rem);
+}
+
+.login-intro {
+  max-width: 560px;
+  animation: rise-in 500ms ease both;
+}
+
+.login-intro h1 {
+  color: #123524;
+  font-size: clamp(3rem, 7vw, 6.5rem);
+  line-height: 0.94;
+  letter-spacing: 0;
+  margin: 1.4rem 0;
+}
+
+.login-intro h1 em {
+  color: var(--brand);
+  font-style: normal;
+}
+
+.login-intro .login-copy {
+  max-width: 430px;
+  font-size: 1.08rem;
+  line-height: 1.65;
+}
+
+.login-highlights {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  max-width: 440px;
+}
+
+.login-highlights div {
+  display: grid;
+  gap: 0.2rem;
+  border-left: 2px solid #76b992;
+  padding-left: 1rem;
+}
+
+.login-highlights strong {
+  color: #183b29;
+}
+
+.login-highlights span,
+.login-privacy,
+.login-card-copy {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
 .login-card {
   width: min(420px, 100%);
   background: #ffffff;
   border: 1px solid #d4e3d8;
-  border-radius: 22px;
+  border-radius: 6px;
   box-shadow: 0 20px 55px rgba(12, 45, 28, 0.13);
-  padding: clamp(1.1rem, 3.5vw, 1.8rem);
+  padding: clamp(1.5rem, 4vw, 2.3rem);
   display: grid;
   gap: 0.9rem;
+  animation: rise-in 600ms 100ms ease both;
+}
+
+.login-card-mark {
+  width: min(100%, 260px);
+  height: auto;
+  display: block;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.login-card-mark img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.login-card-kicker {
+  color: var(--brand);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 0.8rem;
+}
+
+.login-card h2 {
+  font-size: 1.8rem;
+  margin: 0.35rem 0;
 }
 
 .login-card h1 {
@@ -399,7 +514,7 @@ button:disabled {
 .google-manual-btn {
   width: 100%;
   background: #124d7d;
-  padding: 0.75rem 1rem;
+  padding: 0.82rem 1rem;
   font-size: 1rem;
   position: relative;
   z-index: 11;
@@ -411,6 +526,24 @@ button:disabled {
 
 .google-manual-btn:disabled {
   background: #6d87a2;
+}
+
+.google-button-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.4rem;
+  border-radius: 50%;
+  background: #fff;
+  color: #124d7d;
+  font-weight: 700;
+}
+
+.login-privacy {
+  border-top: 1px solid #e2e9e2;
+  padding-top: 0.8rem;
+  margin-top: 0.3rem;
 }
 
 @media (max-width: 1000px) {
@@ -441,5 +574,30 @@ button:disabled {
 
   .user-session-panel {
     justify-items: start;
+  }
+
+  .login-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    max-width: 560px;
+  }
+
+  .login-intro h1 {
+    font-size: clamp(3rem, 13vw, 5rem);
+  }
+
+  .login-highlights {
+    margin-top: 1.5rem;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

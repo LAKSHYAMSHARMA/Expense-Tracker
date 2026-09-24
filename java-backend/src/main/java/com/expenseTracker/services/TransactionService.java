@@ -105,11 +105,13 @@ public class TransactionService {
         return toDto(savedTransaction);
     }
 
-    public TransactionDTO updateTransaction(TransactionDTO transactionDTO) {
+    public TransactionDTO updateTransaction(Integer userId, TransactionDTO transactionDTO) {
         log.info("Updating transaction with id: {}", transactionDTO.getId());
 
         Transaction existingTransaction = transactionRepository.findById(transactionDTO.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + transactionDTO.getId()));
+
+        ensureOwnedByUser(existingTransaction.getUser(), userId);
 
         applyTransactionFields(existingTransaction, transactionDTO);
 
@@ -119,11 +121,13 @@ public class TransactionService {
         return toDto(savedTransaction);
     }
 
-    public void deleteTransactionById(Integer transactionId) {
+    public void deleteTransactionById(Integer userId, Integer transactionId) {
         log.info("Deleting transaction with id: {}", transactionId);
 
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + transactionId));
+
+        ensureOwnedByUser(transaction.getUser(), userId);
 
         transactionRepository.delete(transaction);
         log.info("Transaction deleted successfully");
@@ -152,12 +156,22 @@ public class TransactionService {
         TransactionCategory category = transactionCategoryRepository.findById(transactionDTO.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction category not found with id: " + transactionDTO.getCategoryId()));
 
+        if (!category.isPredefined()) {
+            ensureOwnedByUser(category.getUser(), transactionDTO.getUserId());
+        }
+
         transaction.setUser(user);
         transaction.setTransactionCategory(category);
         transaction.setTransactionName(transactionDTO.getTransactionName());
         transaction.setTransactionAmount(transactionDTO.getTransactionAmount());
         transaction.setTransactionDate(transactionDTO.getTransactionDate());
         transaction.setTransactionType(transactionDTO.getTransactionType());
+    }
+
+    private void ensureOwnedByUser(User owner, Integer userId) {
+        if (owner == null || !owner.getId().equals(userId)) {
+            throw new ResourceNotFoundException("Resource not found");
+        }
     }
 
     private TransactionDTO toDto(Transaction transaction) {

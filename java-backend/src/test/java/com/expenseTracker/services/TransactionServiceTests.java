@@ -18,8 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -111,14 +109,14 @@ public class TransactionServiceTests {
     public void testDeleteTransaction_Success() {
         when(transactionRepository.findById(1)).thenReturn(Optional.of(testTransaction));
 
-        assertDoesNotThrow(() -> transactionService.deleteTransactionById(1));
+        assertDoesNotThrow(() -> transactionService.deleteTransactionById(1, 1));
         verify(transactionRepository, times(1)).delete(testTransaction);
     }
 
     @Test
     public void testDeleteTransaction_NotFound() {
         when(transactionRepository.findById(1)).thenReturn(Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> transactionService.deleteTransactionById(1));
+        assertThrows(ResourceNotFoundException.class, () -> transactionService.deleteTransactionById(1, 1));
     }
 
     @Test
@@ -172,7 +170,7 @@ public class TransactionServiceTests {
         when(transactionCategoryRepository.findById(1)).thenReturn(Optional.of(testCategory));
         when(transactionRepository.save(any(Transaction.class))).thenReturn(testTransaction);
 
-        TransactionDTO result = transactionService.updateTransaction(testTransactionDTO);
+        TransactionDTO result = transactionService.updateTransaction(1, testTransactionDTO);
 
         assertNotNull(result);
         verify(transactionRepository, times(1)).save(any(Transaction.class));

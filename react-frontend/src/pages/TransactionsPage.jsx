@@ -199,6 +199,10 @@ const TransactionsPage = () => {
   };
 
   const handleDelete = async (transactionId) => {
+    if (!window.confirm('Delete this transaction? This action cannot be undone.')) {
+      return;
+    }
+
     setError('');
 
     try {
@@ -267,8 +271,8 @@ const TransactionsPage = () => {
 
           <label>
             <span>Category</span>
-            <select name="categoryId" value={form.categoryId} onChange={handleInputChange}>
-              <option value="">No category</option>
+            <select name="categoryId" value={form.categoryId} onChange={handleInputChange} required>
+              <option value="" disabled>Select a category</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.categoryName}

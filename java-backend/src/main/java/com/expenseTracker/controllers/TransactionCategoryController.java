@@ -47,8 +47,9 @@ public class TransactionCategoryController {
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get a transaction category by ID")
     public ResponseEntity<ApiResponse<TransactionCategoryDTO>> getTransactionCategoryById(@PathVariable Integer id) {
+        Integer userId = getAuthenticatedUserId();
         log.info("GET request: Fetch transaction category with id: {}", id);
-        TransactionCategoryDTO transactionCategory = transactionCategoryService.getTransactionCategoryById(id);
+        TransactionCategoryDTO transactionCategory = transactionCategoryService.getTransactionCategoryById(userId, id);
         return ResponseEntity.ok(ApiResponse.success(transactionCategory, "Category retrieved successfully", HttpStatus.OK.value()));
     }
 
@@ -73,7 +74,7 @@ public class TransactionCategoryController {
         Integer userId = getAuthenticatedUserId();
         transactionCategoryDTO.setUserId(userId);
         log.info("PUT request: Update transaction category with id: {} for user: {}", id, userId);
-        TransactionCategoryDTO updatedTransactionCategory = transactionCategoryService.updateTransactionCategoryById(id, transactionCategoryDTO);
+        TransactionCategoryDTO updatedTransactionCategory = transactionCategoryService.updateTransactionCategoryById(userId, id, transactionCategoryDTO);
         return ResponseEntity.ok(ApiResponse.success(updatedTransactionCategory, "Category updated successfully", HttpStatus.OK.value()));
     }
 
@@ -81,8 +82,9 @@ public class TransactionCategoryController {
     @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Delete a transaction category")
     public ResponseEntity<ApiResponse<Void>> deleteTransactionCategoryById(@PathVariable Integer id) {
+        Integer userId = getAuthenticatedUserId();
         log.info("DELETE request: Delete transaction category with id: {}", id);
-        transactionCategoryService.deleteTransactionCategoryById(id);
+        transactionCategoryService.deleteTransactionCategoryById(userId, id);
         return ResponseEntity.ok(ApiResponse.success(null, "Category deleted successfully", HttpStatus.OK.value()));
     }
 }

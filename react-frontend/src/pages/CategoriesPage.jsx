@@ -75,6 +75,10 @@ const CategoriesPage = () => {
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm('Delete this category? Categories used by transactions must be renamed instead.')) {
+      return;
+    }
+
     setError('');
 
     try {
@@ -139,14 +143,21 @@ const CategoriesPage = () => {
               <tbody>
                 {categories.map((category) => (
                   <tr key={category.id}>
-                    <td>{category.categoryName}</td>
+                    <td>
+                      {category.categoryName}
+                      {category.predefined && <span className="badge badge-income category-lock">Predefined</span>}
+                    </td>
                     <td className="cell-actions">
-                      <button type="button" className="btn-ghost" onClick={() => handleEdit(category)}>
-                        Edit
-                      </button>
-                      <button type="button" className="btn-danger" onClick={() => handleDelete(category.id)}>
-                        Delete
-                      </button>
+                      {!category.predefined && (
+                        <>
+                          <button type="button" className="btn-ghost" onClick={() => handleEdit(category)}>
+                            Edit
+                          </button>
+                          <button type="button" className="btn-danger" onClick={() => handleDelete(category.id)}>
+                            Delete
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))}
