@@ -108,7 +108,7 @@ jobs:
         tags: ${{ secrets.DOCKER_USERNAME }}/expense-tracker-backend:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
-    
+
     - name: Build and push frontend image
       uses: docker/build-push-action@v6
       with:
@@ -120,3 +120,23 @@ jobs:
           VITE_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push-docker
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Deploy to Oracle VM
+      uses: appleboy/ssh-action@v1.2.2
+      with:
+        host: ${{ secrets.ORACLE_HOST }}
+        username: ${{ secrets.ORACLE_USER }}
+        key: ${{ secrets.ORACLE_SSH_KEY }}
+        command_timeout: 20m
+        script: |
+          set -e
+          cd ~/Expense-Tracker
+          git pull --ff-only origin main
+          docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build
+          docker image prune -f

@@ -4,6 +4,9 @@ dist
 .git
 .gitignore
 .env
+.env.*
+*.pem
+*.key
 .env.local
 .DS_Store
 *.md
