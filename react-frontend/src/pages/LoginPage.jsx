@@ -1,45 +1,63 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const LoginPage = ({ onGoogleSignIn, loading, error }) => {
   const [scriptError, setScriptError] = useState('');
+  const googleButtonRef = useRef(null);
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-  const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+
   useEffect(() => {
-    const params = new URLSearchParams(window.location.hash.substring(1));
-    const idToken = params.get('id_token');
-    
-    if (idToken) {
-      onGoogleSignIn(idToken);
-    }
-  }, [onGoogleSignIn]);
-
-  const handleContinueWithGoogle = () => {
-    setScriptError('');
-
-    if (!clientId || clientId.trim() === '') {
-      setScriptError('Google client ID is not configured.');
-      return;
+    if (!clientId.trim() || !googleButtonRef.current) {
+      return undefined;
     }
 
-    try {
-      const redirectUri = `${currentOrigin}/`;
-      const scope = 'openid profile email';
-      const responseType = 'id_token';
-      const nonce = Math.random().toString(36).substr(2, 9);
+    const initializeGoogleSignIn = () => {
+      if (!window.google?.accounts?.id || !googleButtonRef.current) {
+        setScriptError('Google sign-in could not be loaded. Please try again.');
+        return;
+      }
 
-      const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-      authUrl.searchParams.set('client_id', clientId);
-      authUrl.searchParams.set('redirect_uri', redirectUri);
-      authUrl.searchParams.set('response_type', responseType);
-      authUrl.searchParams.set('scope', scope);
-      authUrl.searchParams.set('nonce', nonce);
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: ({ credential }) => {
+          if (credential) {
+            onGoogleSignIn(credential);
+          }
+        },
+        ux_mode: 'popup',
+      });
+      googleButtonRef.current.replaceChildren();
+      window.google.accounts.id.renderButton(googleButtonRef.current, {
+        theme: 'outline',
+        size: 'large',
+        text: 'continue_with',
+        shape: 'rectangular',
+        width: 320,
+      });
+    };
 
-      window.location.href = authUrl.toString();
-    } catch (e) {
-      console.error('Error initiating OAuth flow:', e);
-      setScriptError('Failed to initiate Google sign-in. Please try again.');
+    const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+    if (existingScript) {
+      if (window.google?.accounts?.id) {
+        initializeGoogleSignIn();
+      } else {
+        existingScript.addEventListener('load', initializeGoogleSignIn, { once: true });
+      }
+      return undefined;
     }
-  };
+
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = initializeGoogleSignIn;
+    script.onerror = () => setScriptError('Google sign-in could not be loaded. Please try again.');
+    document.head.appendChild(script);
+
+    return () => {
+      script.onload = null;
+      script.onerror = null;
+    };
+  }, [clientId, onGoogleSignIn]);
 
   return (
     <main className="login-screen">
@@ -75,15 +93,7 @@ const LoginPage = ({ onGoogleSignIn, loading, error }) => {
 
           {(scriptError || error) && <p className="error-text">{scriptError || error}</p>}
 
-          <button
-            type="button"
-            className="google-manual-btn"
-            onClick={handleContinueWithGoogle}
-            disabled={loading}
-          >
-            <span className="google-button-icon" aria-hidden="true">G</span>
-            {loading ? 'Signing you in...' : 'Continue with Google'}
-          </button>
+          <div ref={googleButtonRef} className="google-sign-in-button" aria-busy={loading} />
 
           {loading && <p className="status-text">Completing sign-in...</p>}
           <p className="login-privacy">Your data stays tied to your account and is never shared with other users.</p>
