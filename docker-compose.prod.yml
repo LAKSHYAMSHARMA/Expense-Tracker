@@ -19,9 +19,7 @@ services:
       - expense-tracker-network
 
   backend:
-    build:
-      context: ./java-backend
-      dockerfile: Dockerfile
+    image: ${DOCKER_USERNAME:?DOCKER_USERNAME is required}/expense-tracker-backend:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
       DATABASE_URL: jdbc:mysql://mysql:3306/${DB_NAME:?DB_NAME is required}
@@ -46,12 +44,7 @@ services:
       - expense-tracker-network
 
   frontend:
-    build:
-      context: ./react-frontend
-      dockerfile: Dockerfile
-      args:
-        VITE_API_BASE_URL: ${API_BASE_URL:?API_BASE_URL is required}/api/v1
-        VITE_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?GOOGLE_CLIENT_ID is required}
+    image: ${DOCKER_USERNAME:?DOCKER_USERNAME is required}/expense-tracker-frontend:${IMAGE_TAG:-latest}
     restart: unless-stopped
     depends_on:
       backend:
